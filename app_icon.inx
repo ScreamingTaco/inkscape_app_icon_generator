@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <_name>Generate App Icons</_name>
+    <id>org.inkscape.app_icon</id>
+
+    <dependency type="executable" location="extensions">app_icon.py</dependency>
+
+    <param name="extension_description" type="description">This extension generates icon bundles for iOS and/or Android applications based on the current image.
+      The canvas must be square. Remeber that iOS does not support alpha channels in their icons.
+      </param>
+
+    <!-- TODO: add a text field for the path to save the file to -->
+
+    <param name="ios_icons" type="boolean" gui-text="iOS Icons">true</param>
+    <param name="android_icons" type="boolean" gui-text="Android Icons">true</param>
+
+    <effect>
+		<object-type>all</object-type>
+		<effects-menu>
+			<submenu _name="Generate App Icons"/>
+		</effects-menu>
+	</effect>
+
+    <script>
+        <command reldir="extensions" interpreter="python">app_icon.py</command>
+    </script>
+</inkscape-extension>
