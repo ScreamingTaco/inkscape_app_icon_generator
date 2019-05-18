@@ -53,6 +53,18 @@ class GenerateIconsEffect(inkex.Effect):
                 os.system("inkscape -e " + path + "Icon-App-20x20@2x.png -h 40 -f " + currentFileName)
                 os.system("inkscape -e " + path + "Icon-App-20x20@1x.png -h 20 -f " + currentFileName)
                 inkex.errormsg(_("saving to: " + path))
+            if android == "true":
+                path = "~/appicon_output" + currentFileName + "/android/"
+                self.makePath(path)
+                # inkex.errormsg(_("calling inkscape -e " + path + "Icon-app-1024.png -h 1024 -f " + currentFileName))
+                os.system("inkscape -e " + path + "Icon-xxxhdpi.png -h 192 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-xxhdpi.png -h 144 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-xhdpi.png -h 96 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-hdpi.png -h 72 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-mdpi.png -h 48 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-ldpi.png -h 36 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-512.png -h 512 -f " + currentFileName)
+                inkex.errormsg(_("saving to: " + path))
 
 
     def runTests(self):
