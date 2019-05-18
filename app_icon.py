@@ -63,7 +63,7 @@ class GenerateIconsEffect(inkex.Effect):
                 os.system("inkscape -e " + path + "Icon-hdpi.png -h 72 -f " + currentFileName)
                 os.system("inkscape -e " + path + "Icon-mdpi.png -h 48 -f " + currentFileName)
                 os.system("inkscape -e " + path + "Icon-ldpi.png -h 36 -f " + currentFileName)
-                os.system("inkscape -e " + path + "Icon-512.png -h 512 -f " + currentFileName)
+                os.system("inkscape -e " + path + "Icon-web.png -h 512 -f " + currentFileName)
                 inkex.errormsg(_("saving to: " + path))
 
 
