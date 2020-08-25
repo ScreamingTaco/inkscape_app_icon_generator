@@ -172,7 +172,7 @@ class GenerateIconsEffect(inkex.Effect):
                     for DirectoryPrefix in DirectoryPrefixes:
                         FullPath = android_path + DirectoryPrefix + "-" + Density + "/" 
                         self.makePath( FullPath )
-                        os.system( "inkscape " + currentFileName + " --export-area-page --export-filename=" + FullPath + name + ".png -h " + str( DensityInPx ) + " -w " + str( DensityInPx ) )
+                        os.system( "inkscape " + currentFileName + " --export-area-page --export-filename=" + FullPath + name + ".png -h " + str( int( DensityInPx ) ) + " -w " + str( int( DensityInPx ) ) )
 
             if windows_icons == "true" or windows_one_ico_file == "true":
                 self.makePath( windows_path )
@@ -180,7 +180,8 @@ class GenerateIconsEffect(inkex.Effect):
                 #Resolutions = [ 256 ]
                 for Resolution in Resolutions:
                     ImagePath = windows_path + name + "-" + str( Resolution ) + ".png" 
-                    os.system("inkscape " + currentFileName + "  --export-area-page --export-filename=" + ImagePath + " -h " + str( Resolution ) + " -w " + str( Resolution )  )
+                    os.system("inkscape " + currentFileName + "  --export-area-page --export-filename=" + ImagePath + " -h " + str( int( Resolution ) ) + " -w " + str( int( Resolution ) )  )
+                    inkex.errormsg(_("Imagepath <" + ImagePath + ">"))
                     self.WindowsIconCurList.append( WindowsIconInfo( ImagePath, Resolution ) )
                 if windows_one_ico_file == "true":                
                     self.CreateIconFile( windows_path + name + ".ico", 1 )
