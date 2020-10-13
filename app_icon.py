@@ -29,7 +29,7 @@ def export_image(source, output, resolution=None):
     args = [source, "-o", output]
     if resolution:
         args += ["-h", str(resolution)]
-    debug(args)
+    debug("Calling Inkscape with args %s" % args)
     command.inkscape(*args)
 
 
@@ -128,7 +128,7 @@ class GenerateIconsEffect(inkex.Effect):
                 self.makePath(ios_path)
                 for resolution in IOS_ICON_RESOLUTIONS:
                     ios_icon_name = "Icon-App-{res}x{res}@1x.png".format(res=resolution)
-                    debug('exporting ios image %s' % ios_icon_name)
+                    debug('Exporting ios image %s' % ios_icon_name)
                     export_image(
                         currentFileName,
                         os.path.join(ios_path, ios_icon_name),
@@ -228,9 +228,9 @@ class GenerateIconsEffect(inkex.Effect):
         self.CurrentOffset = self.CurrentOffset + Filesize
 
     def WriteFile( self, ByteArray, WindowsIconInfo ):
-        File = open( WindowsIconInfo.GetImagePath(), "rb" )
-        ByteArrayFile = bytearray( File.read() )
-        ByteArray.extend( ByteArrayFile )
+        with open( WindowsIconInfo.GetImagePath(), "rb" ) as File:
+            ByteArrayFile = bytearray( File.read() )
+            ByteArray.extend( ByteArrayFile )
         
         
     def CreateIconFile( self, Filename, Type ):
@@ -259,8 +259,8 @@ class GenerateIconsEffect(inkex.Effect):
             self.WriteFile( ByteArray, WindowsIconInfo )      
 
         # -- Output to a file
-        File = open( Filename, "wb" )
-        File.write( ByteArray )
+        with open( Filename, "wb" ) as File:
+            File.write( ByteArray )
 
 
 
