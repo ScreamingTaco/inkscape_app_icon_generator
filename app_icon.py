@@ -74,13 +74,6 @@ class GenerateIconsEffect(inkex.Effect):
                                      help='Path where the windows icons are stored')
         self.arg_parser.add_argument('-n', '--name', dest='name', default='false',
                                      help='Name of image file without extension or path')
-   
-    def NormalizeDir( self, Directory ):
-        if len( Directory ) == 0:
-            return Directory
-        if Directory.endswith( "/" ) or Directory.endswith( "\\" ):
-            return Directory
-        return Directory + "/"
 
     def effect(self):
         # make sure the doc meets the requirements
@@ -106,12 +99,7 @@ class GenerateIconsEffect(inkex.Effect):
             windows_one_ico_file    = self.options.windows_one_ico_file
             windows_path            = self.options.windows_path
             
-            name                    = self.options.name
-
-            ios_path        = self.NormalizeDir( ios_path     )
-            android_path    = self.NormalizeDir( android_path )
-            windows_path    = self.NormalizeDir( windows_path )
-            
+            icon_base_name                    = self.options.name
 
             svg = self.document.getroot()
             currentFileName = self.args[-1]
@@ -139,6 +127,8 @@ class GenerateIconsEffect(inkex.Effect):
                 # inkex.errormsg(_("saving to: " + ios_path))
 
             if android_mipmap == "true" or android_drawable == "true":
+                android_icon_name = "%s.png" % icon_base_name
+
                 DirectoryPrefixes = []
 
                 if android_mipmap == "true":
@@ -151,7 +141,7 @@ class GenerateIconsEffect(inkex.Effect):
                 #os.system("inkscape -e " + path + "Icon-xxxhdpi.png -h 192 -f " + currentFileName)
 
                 # Densities calculated of baseline in ratios 3:4:6:8:12:16
-                # Where 4 correspons to mdpi the baseline dpi (for instance 48 so the divisor = 12)
+                # Where 4 corresponds to mdpi the baseline dpi (for instance 48 so the divisor = 12)
                 if android_basepx == 0:
                     android_basepx = 48
                 DensityMap = { "ldpi" : 3, "mdpi" : 4, "hdpi" : 6, "xhdpi" : 8, "xxhdpi" : 12, "xxxhdpi" : 16 }
@@ -161,19 +151,22 @@ class GenerateIconsEffect(inkex.Effect):
                 for Density, Ratio in DensityMap.items():
                     DensityInPx = ( Ratio * android_basepx ) / 4
                     for DirectoryPrefix in DirectoryPrefixes:
-                        FullPath = android_path + DirectoryPrefix + "-" + Density + "/" 
+                        FullPath = os.path.join(android_path, "%s-%s" % ( DirectoryPrefix, Density ))
                         self.makePath( FullPath )
-                        os.system( "inkscape -e " + FullPath + name + ".png -h " + str( DensityInPx ) + " -f " + currentFileName )
+                        targetFile = os.path.join(FullPath, android_icon_name)
+                        os.system( "inkscape -e " + targetFile +" -h " + str( DensityInPx ) + " -f " + currentFileName )
 
             if windows_icons == "true" or windows_one_ico_file == "true":
                 self.makePath( windows_path )
                 Resolutions = [ 256, 128, 64, 48, 32, 24, 16, 12, 8 ]
                 for Resolution in Resolutions:
-                    ImagePath = windows_path + name + "-" + str( Resolution ) + ".png" 
+                    windows_icon_name = "%s-%s.png" % (icon_base_name, Resolution)
+                    ImagePath = os.path.join(windows_path, windows_icon_name)
                     os.system("inkscape -e " + ImagePath + " -h " + str( Resolution ) + " -f " + currentFileName)
                     self.WindowsIconCurList.append( WindowsIconInfo( ImagePath, Resolution ) )
-                if windows_one_ico_file == "true":                
-                    self.CreateIconFile( windows_path + name + ".ico", 1 )
+                if windows_one_ico_file == "true":
+                    ico_file_path = os.path.join(windows_path, "%s.ico" % icon_base_name)
+                    self.CreateIconFile(ico_file_path, 1)
 
     # Write int (defined in this program as 2 bytes ) 
     def WriteInt2ToByteArray( self, ByteArray, Value ):
@@ -281,7 +274,6 @@ class GenerateIconsEffect(inkex.Effect):
     def makePath(self, path):
         if not os.path.exists( path ):
             os.makedirs( path )
-        #os.system("mkdir -p " + path)
 
 # Create effect instance and apply it.
 effect = GenerateIconsEffect()
