@@ -267,4 +267,4 @@ class GenerateIconsEffect(inkex.Effect):
 
 # Create effect instance and apply it.
 effect = GenerateIconsEffect()
-effect.affect()
+effect.run()
