@@ -252,8 +252,8 @@ class GenerateIconsEffect(inkex.Effect):
 
         #get document and make sure it is a square
         svg = self.document.getroot()
-        width  = self.unittouu(svg.get('width'))
-        height = self.unittouu(svg.attrib['height'])
+        width  = self.svg.unittouu(svg.get('width'))
+        height = self.svg.unittouu(svg.attrib['height'])
 
         if width != height:
             inkex.errormsg(_("Canvas is not square"))
