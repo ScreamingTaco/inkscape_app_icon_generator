@@ -7,12 +7,30 @@
 # 20200408 Ron AF Greve Splitted android dirs in mipmap and drawables and added windows icon and ICO file. Added path variables.
 
 import inkex
+from inkex import command
 from simplestyle import *
 from lxml import etree
 import os
 #from pathlib import Path
 import traceback
 import sys
+
+DEBUG = False
+WINDOWS_ICON_RESOLUTIONS = [256, 128, 64, 48, 32, 24, 16, 12, 8]
+IOS_ICON_RESOLUTIONS = [1024, 1024, 167, 152, 76, 180, 120, 120, 80, 40, 87, 58, 29, 60, 40, 20]
+
+
+def debug(msg):
+    if DEBUG:
+        inkex.utils.debug(msg)
+
+
+def export_image(source, output, resolution=None):
+    args = [source, "-o", output]
+    if resolution:
+        args += ["-h", str(resolution)]
+    debug(args)
+    command.inkscape(*args)
 
 
 class WindowsIconInfo():
@@ -38,7 +56,7 @@ class WindowsIconInfo():
         return self.CurX 
 	  
     def GetCurY( self ):
-        return self.CurY 
+        return self.CurY
 
 
 
@@ -105,14 +123,17 @@ class GenerateIconsEffect(inkex.Effect):
             currentFileName = self.options.input_file
             
             #saveDir = os.path.expanduser("~") #saves icons to the home directory
-            IOS_ICON_RESOLUTIONS = [1024, 1024, 167, 152, 76, 180, 120, 120, 80, 40, 87, 58, 29, 60, 40, 20]
 
             if ios_icons == "true":
                 self.makePath(ios_path)
                 for resolution in IOS_ICON_RESOLUTIONS:
                     ios_icon_name = "Icon-App-{res}x{res}@1x.png".format(res=resolution)
-                    output_file = os.path.join(ios_path, ios_icon_name)
-                    os.system("inkscape -e " + output_file + " -f " + currentFileName)
+                    debug('exporting ios image %s' % ios_icon_name)
+                    export_image(
+                        currentFileName,
+                        os.path.join(ios_path, ios_icon_name),
+                        resolution
+                    )
 
                 # inkex.errormsg(_("saving to: " + ios_path))
 
@@ -144,16 +165,23 @@ class GenerateIconsEffect(inkex.Effect):
                         FullPath = os.path.join(android_path, "%s-%s" % ( DirectoryPrefix, Density ))
                         self.makePath( FullPath )
                         targetFile = os.path.join(FullPath, android_icon_name)
-                        os.system( "inkscape -e " + targetFile +" -h " + str( DensityInPx ) + " -f " + currentFileName )
+                        export_image(
+                            currentFileName,
+                            targetFile,
+                            int(DensityInPx)
+                        )
 
             if windows_icons == "true" or windows_one_ico_file == "true":
                 self.makePath( windows_path )
-                Resolutions = [ 256, 128, 64, 48, 32, 24, 16, 12, 8 ]
-                for Resolution in Resolutions:
-                    windows_icon_name = "%s-%s.png" % (icon_base_name, Resolution)
-                    ImagePath = os.path.join(windows_path, windows_icon_name)
-                    os.system("inkscape -e " + ImagePath + " -h " + str( Resolution ) + " -f " + currentFileName)
-                    self.WindowsIconCurList.append( WindowsIconInfo( ImagePath, Resolution ) )
+
+                for resolution in WINDOWS_ICON_RESOLUTIONS:
+                    windows_icon_name = "%s-%s.png" % (icon_base_name, resolution)
+                    icon_dest_path = os.path.join(windows_path, windows_icon_name)
+                    export_image(
+                        currentFileName,
+                        icon_dest_path,
+                        resolution)
+                    self.WindowsIconCurList.append( WindowsIconInfo( icon_dest_path, resolution ) )
                 if windows_one_ico_file == "true":
                     ico_file_path = os.path.join(windows_path, "%s.ico" % icon_base_name)
                     self.CreateIconFile(ico_file_path, 1)
