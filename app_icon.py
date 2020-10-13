@@ -6,7 +6,6 @@
 #          Carlos Vazquez initial version
 # 20200408 Ron AF Greve Splitted android dirs in mipmap and drawables and added windows icon and ICO file. Added path variables.
 
-
 import inkex
 from simplestyle import *
 from lxml import etree
@@ -14,6 +13,7 @@ import os
 #from pathlib import Path
 import traceback
 import sys
+
 
 class WindowsIconInfo():
     # Note the windows icon file can either be a ICO or CUR file 
@@ -105,25 +105,15 @@ class GenerateIconsEffect(inkex.Effect):
             currentFileName = self.args[-1]
             
             #saveDir = os.path.expanduser("~") #saves icons to the home directory
+            IOS_ICON_RESOLUTIONS = [1024, 1024, 167, 152, 76, 180, 120, 120, 80, 40, 87, 58, 29, 60, 40, 20]
+
             if ios_icons == "true":
                 self.makePath(ios_path)
+                for resolution in IOS_ICON_RESOLUTIONS:
+                    ios_icon_name = "Icon-App-{res}x{res}@1x.png".format(res=resolution)
+                    output_file = os.path.join(ios_path, ios_icon_name)
+                    os.system("inkscape -e " + output_file + " -f " + currentFileName)
 
-                os.system("inkscape -e " + ios_path + "Icon-App-1024x1024@1x.png -h 1024 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-1024x1024@1x.png -h 1024 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-83.5x83.5@2x.png -h 167 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-76x76@2x.png -h 152 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-76x76@1x.png -h 76 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-60x60@3x.png -h 180 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-60x60@2x.png -h 120 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-40x40@3x.png -h 120 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-40x40@2x.png -h 80 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-40x40@1x.png -h 40 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-29x29@3x.png -h 87 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-29x29@2x.png -h 58 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-29x29@1x.png -h 29 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-20x20@3x.png -h 60 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-20x20@2x.png -h 40 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-20x20@1x.png -h 20 -f " + currentFileName)
                 # inkex.errormsg(_("saving to: " + ios_path))
 
             if android_mipmap == "true" or android_drawable == "true":
