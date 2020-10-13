@@ -102,7 +102,7 @@ class GenerateIconsEffect(inkex.Effect):
             icon_base_name                    = self.options.name
 
             svg = self.document.getroot()
-            currentFileName = self.args[-1]
+            currentFileName = self.options.input_file
             
             #saveDir = os.path.expanduser("~") #saves icons to the home directory
             IOS_ICON_RESOLUTIONS = [1024, 1024, 167, 152, 76, 180, 120, 120, 80, 40, 87, 58, 29, 60, 40, 20]
