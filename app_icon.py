@@ -47,40 +47,33 @@ class GenerateIconsEffect(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option('-k', '--ios_icons', action = 'store',
-          type = 'string', dest = 'ios_icons', default = 'false',
-          help = 'Create ios icons?')
-        self.OptionParser.add_option('-i', '--ios_path', action = 'store',
-          type = 'string', dest = 'ios_path', default = 'false',
-          help = 'Path where the ios icons are stored')
-        self.OptionParser.add_option('-m', '--android_mipmap', action = 'store',
-          type = 'string', dest = 'android_mipmap', default = 'false',
-          help = 'Create android mipmap dirs and icons?')
-        self.OptionParser.add_option('-d', '--android_drawable', action = 'store',
-          type = 'string', dest = 'android_drawable', default = 'false',
-          help = 'Create android drawable dirs and icons?')
-        self.OptionParser.add_option('-a', '--android_path', action = 'store',
-          type = 'string', dest = 'android_path', default = 'false',
-          help = 'Path to and including the android res directory')
-        self.OptionParser.add_option('-t', '--android_tvdpi', action = 'store',
-          type = 'string', dest = 'android_tvdpi', default = 'false',
-          help = 'Add android TV resolution')
-        self.OptionParser.add_option('-b', '--android_basepx', action = 'store',
-          type = 'string', dest = 'android_basepx', default = 'false',
-          help = 'Add android TV resolution')
-        self.OptionParser.add_option('-x', '--windows_icons', action = 'store',
-          type = 'string', dest = 'windows_icons', default = 'false',
-          help = 'Create windows icons?')
-        self.OptionParser.add_option('-c', '--windows_one_ico_file', action = 'store',
-          type = 'string', dest = 'windows_one_ico_file', default = 'false',
-          help = 'Create one windows ico file?')
-        self.OptionParser.add_option('-w', '--windows_path', action = 'store',
-          type = 'string', dest = 'windows_path', default = 'false',
-          help = 'Path where the windows icons are stored')
 
-        self.OptionParser.add_option('-n', '--name', action = 'store',
-          type = 'string', dest = 'name', default = 'false',
-          help = 'Name of image file without extension or path')
+        # Arguments for generating ios icons
+        self.arg_parser.add_argument('-k', '--ios_icons', dest='ios_icons', default='false',
+                                     help='Create ios icons?')
+        self.arg_parser.add_argument('-i', '--ios_path', dest='ios_path', help='Path where the ios icons are stored')
+
+        # Arguments for generating Android icons
+        self.arg_parser.add_argument('-m', '--android_mipmap', dest='android_mipmap', default='false',
+                                     help='Create android mipmap dirs and icons?')
+        self.arg_parser.add_argument('-d', '--android_drawable', dest='android_drawable', default='false',
+                                     help='Create android drawable dirs and icons?')
+        self.arg_parser.add_argument('-a', '--android_path', dest='android_path', default='false',
+                                     help='Path to and including the android res directory')
+        self.arg_parser.add_argument('-t', '--android_tvdpi', dest='android_tvdpi', default='false',
+                                     help='Add android TV resolution')
+        self.arg_parser.add_argument('-b', '--android_basepx', dest='android_basepx', default='false',
+                                     help='Add android TV resolution')
+
+        # Arguments for generating Windows icons
+        self.arg_parser.add_argument('-x', '--windows_icons', dest='windows_icons', default='false',
+                                     help='Create windows icons?')
+        self.arg_parser.add_argument('-c', '--windows_one_ico_file', dest='windows_one_ico_file', default='false',
+                                     help='Create one windows ico file?')
+        self.arg_parser.add_argument('-w', '--windows_path', dest='windows_path',
+                                     help='Path where the windows icons are stored')
+        self.arg_parser.add_argument('-n', '--name', dest='name', default='false',
+                                     help='Name of image file without extension or path')
    
     def NormalizeDir( self, Directory ):
         if len( Directory ) == 0:
