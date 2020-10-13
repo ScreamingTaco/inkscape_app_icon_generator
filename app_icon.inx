@@ -11,23 +11,23 @@
     <dependency type="executable" location="extensions">app_icon.py</dependency>
 
     <param name="extension_description" type="description">This extension generates icon bundles for iOS and/or Android and/or MS-Windows applications based on the current image.
-      The canvas must be square. Remeber that iOS does not support alpha channels in their icons.
+      The canvas must be square. Remember that iOS does not support alpha channels in their icons.
     </param>
 
-    <param name="name"                  type="string"  gui-text="Icon Filename (without extension, without path):"      >icon</param>
+    <param name="name"                  type="string"  gui-text="Icon Filename (without extension, without path):"                 >icon</param>
 
-    <param name="ios_icons"             type="boolean" gui-text="iOS Icons"                                             >true</param>
-    <param name="ios_path"              type="string"  gui-text="Directory to save IOS images to:"                      >/tmp</param>
+    <param name="ios_icons"             type="boolean" gui-text="iOS Icons"                                                        >true</param>
+    <param name="ios_path"              type="path" mode="folder" gui-text="Directory to save IOS images to:"                      >/tmp</param>
 
-    <param name="android_mipmap"        type="boolean" gui-text="Create Android MipMap dirs"                            >true</param>
-    <param name="android_drawable"      type="boolean" gui-text="Create Android Drawable dirs"                          >true</param>
-    <param name="android_tvdpi"         type="boolean" gui-text="Add TV Resolution"                                     >true</param>
-    <param name="android_basepx"        type="string"  gui-text="Base Px (normally 48)"                                 >48</param>
-    <param name="android_path"          type="string"  gui-text="The res directory in your android path:"               >/tmp/res</param>
+    <param name="android_mipmap"        type="boolean" gui-text="Create Android MipMap dirs"                                       >true</param>
+    <param name="android_drawable"      type="boolean" gui-text="Create Android Drawable dirs"                                     >true</param>
+    <param name="android_tvdpi"         type="boolean" gui-text="Add TV Resolution"                                                >true</param>
+    <param name="android_basepx"        type="string"  gui-text="Base Px (normally 48)"                                            >48</param>
+    <param name="android_path"          type="string"  gui-text="The res directory in your android path:"                          >/tmp/res</param>
 
-    <param name="windows_icons"         type="boolean" gui-text="Windows Icons"                                         >true</param>
-    <param name="windows_one_ico_file"  type="boolean" gui-text="Also create one ICO file (PNG Based)"                  >true</param>
-    <param name="windows_path"          type="string"  gui-text="The windows directory you want to save the icons to:"  >/tmp</param>
+    <param name="windows_icons"         type="boolean" gui-text="Windows Icons"                                                    >true</param>
+    <param name="windows_one_ico_file"  type="boolean" gui-text="Also create one ICO file (PNG Based)"                             >true</param>
+    <param name="windows_path"          type="path" mode="folder" gui-text="The windows directory you want to save the icons to:"  >/tmp</param>
 
     <effect>
         <object-type>all</object-type>

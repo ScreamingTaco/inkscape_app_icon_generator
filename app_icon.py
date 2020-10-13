@@ -6,14 +6,32 @@
 #          Carlos Vazquez initial version
 # 20200408 Ron AF Greve Splitted android dirs in mipmap and drawables and added windows icon and ICO file. Added path variables.
 
-
 import inkex
+from inkex import command
 from simplestyle import *
 from lxml import etree
 import os
 #from pathlib import Path
 import traceback
 import sys
+
+DEBUG = False
+WINDOWS_ICON_RESOLUTIONS = [256, 128, 64, 48, 32, 24, 16, 12, 8]
+IOS_ICON_RESOLUTIONS = [1024, 1024, 167, 152, 76, 180, 120, 120, 80, 40, 87, 58, 29, 60, 40, 20]
+
+
+def debug(msg):
+    if DEBUG:
+        inkex.utils.debug(msg)
+
+
+def export_image(source, output, resolution=None):
+    args = [source, "-o", output]
+    if resolution:
+        args += ["-h", str(resolution)]
+    debug("Calling Inkscape with args %s" % args)
+    command.inkscape(*args)
+
 
 class WindowsIconInfo():
     # Note the windows icon file can either be a ICO or CUR file 
@@ -38,7 +56,7 @@ class WindowsIconInfo():
         return self.CurX 
 	  
     def GetCurY( self ):
-        return self.CurY 
+        return self.CurY
 
 
 
@@ -47,53 +65,39 @@ class GenerateIconsEffect(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option('-k', '--ios_icons', action = 'store',
-          type = 'string', dest = 'ios_icons', default = 'false',
-          help = 'Create ios icons?')
-        self.OptionParser.add_option('-i', '--ios_path', action = 'store',
-          type = 'string', dest = 'ios_path', default = 'false',
-          help = 'Path where the ios icons are stored')
-        self.OptionParser.add_option('-m', '--android_mipmap', action = 'store',
-          type = 'string', dest = 'android_mipmap', default = 'false',
-          help = 'Create android mipmap dirs and icons?')
-        self.OptionParser.add_option('-d', '--android_drawable', action = 'store',
-          type = 'string', dest = 'android_drawable', default = 'false',
-          help = 'Create android drawable dirs and icons?')
-        self.OptionParser.add_option('-a', '--android_path', action = 'store',
-          type = 'string', dest = 'android_path', default = 'false',
-          help = 'Path to and including the android res directory')
-        self.OptionParser.add_option('-t', '--android_tvdpi', action = 'store',
-          type = 'string', dest = 'android_tvdpi', default = 'false',
-          help = 'Add android TV resolution')
-        self.OptionParser.add_option('-b', '--android_basepx', action = 'store',
-          type = 'string', dest = 'android_basepx', default = 'false',
-          help = 'Add android TV resolution')
-        self.OptionParser.add_option('-x', '--windows_icons', action = 'store',
-          type = 'string', dest = 'windows_icons', default = 'false',
-          help = 'Create windows icons?')
-        self.OptionParser.add_option('-c', '--windows_one_ico_file', action = 'store',
-          type = 'string', dest = 'windows_one_ico_file', default = 'false',
-          help = 'Create one windows ico file?')
-        self.OptionParser.add_option('-w', '--windows_path', action = 'store',
-          type = 'string', dest = 'windows_path', default = 'false',
-          help = 'Path where the windows icons are stored')
 
-        self.OptionParser.add_option('-n', '--name', action = 'store',
-          type = 'string', dest = 'name', default = 'false',
-          help = 'Name of image file without extension or path')
-   
-    def NormalizeDir( self, Directory ):
-        if len( Directory ) == 0:
-            return Directory
-        if Directory.endswith( "/" ) or Directory.endswith( "\\" ):
-            return Directory
-        return Directory + "/"
+        # Arguments for generating ios icons
+        self.arg_parser.add_argument('-k', '--ios_icons', dest='ios_icons', default='false',
+                                     help='Create ios icons?')
+        self.arg_parser.add_argument('-i', '--ios_path', dest='ios_path', help='Path where the ios icons are stored')
+
+        # Arguments for generating Android icons
+        self.arg_parser.add_argument('-m', '--android_mipmap', dest='android_mipmap', default='false',
+                                     help='Create android mipmap dirs and icons?')
+        self.arg_parser.add_argument('-d', '--android_drawable', dest='android_drawable', default='false',
+                                     help='Create android drawable dirs and icons?')
+        self.arg_parser.add_argument('-a', '--android_path', dest='android_path', default='false',
+                                     help='Path to and including the android res directory')
+        self.arg_parser.add_argument('-t', '--android_tvdpi', dest='android_tvdpi', default='false',
+                                     help='Add android TV resolution')
+        self.arg_parser.add_argument('-b', '--android_basepx', dest='android_basepx', default='false',
+                                     help='Add android TV resolution')
+
+        # Arguments for generating Windows icons
+        self.arg_parser.add_argument('-x', '--windows_icons', dest='windows_icons', default='false',
+                                     help='Create windows icons?')
+        self.arg_parser.add_argument('-c', '--windows_one_ico_file', dest='windows_one_ico_file', default='false',
+                                     help='Create one windows ico file?')
+        self.arg_parser.add_argument('-w', '--windows_path', dest='windows_path',
+                                     help='Path where the windows icons are stored')
+        self.arg_parser.add_argument('-n', '--name', dest='name', default='false',
+                                     help='Name of image file without extension or path')
 
     def effect(self):
         # make sure the doc meets the requirements
         passing = self.runTests()
 
-        if passing == False:
+        if not passing:
             inkex.errormsg(_("Errors encountered. Please fix them and try again."))
             exit()
         else:
@@ -113,39 +117,29 @@ class GenerateIconsEffect(inkex.Effect):
             windows_one_ico_file    = self.options.windows_one_ico_file
             windows_path            = self.options.windows_path
             
-            name                    = self.options.name
-
-            ios_path        = self.NormalizeDir( ios_path     )
-            android_path    = self.NormalizeDir( android_path )
-            windows_path    = self.NormalizeDir( windows_path )
-            
+            icon_base_name                    = self.options.name
 
             svg = self.document.getroot()
-            currentFileName = self.args[-1]
+            currentFileName = self.options.input_file
             
             #saveDir = os.path.expanduser("~") #saves icons to the home directory
+
             if ios_icons == "true":
                 self.makePath(ios_path)
+                for resolution in IOS_ICON_RESOLUTIONS:
+                    ios_icon_name = "Icon-App-{res}x{res}@1x.png".format(res=resolution)
+                    debug('Exporting ios image %s' % ios_icon_name)
+                    export_image(
+                        currentFileName,
+                        os.path.join(ios_path, ios_icon_name),
+                        resolution
+                    )
 
-                os.system("inkscape -e " + ios_path + "Icon-App-1024x1024@1x.png -h 1024 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-1024x1024@1x.png -h 1024 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-83.5x83.5@2x.png -h 167 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-76x76@2x.png -h 152 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-76x76@1x.png -h 76 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-60x60@3x.png -h 180 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-60x60@2x.png -h 120 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-40x40@3x.png -h 120 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-40x40@2x.png -h 80 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-40x40@1x.png -h 40 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-29x29@3x.png -h 87 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-29x29@2x.png -h 58 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-29x29@1x.png -h 29 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-20x20@3x.png -h 60 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-20x20@2x.png -h 40 -f " + currentFileName)
-                os.system("inkscape -e " + ios_path + "Icon-App-20x20@1x.png -h 20 -f " + currentFileName)
                 # inkex.errormsg(_("saving to: " + ios_path))
 
             if android_mipmap == "true" or android_drawable == "true":
+                android_icon_name = "%s.png" % icon_base_name
+
                 DirectoryPrefixes = []
 
                 if android_mipmap == "true":
@@ -158,7 +152,7 @@ class GenerateIconsEffect(inkex.Effect):
                 #os.system("inkscape -e " + path + "Icon-xxxhdpi.png -h 192 -f " + currentFileName)
 
                 # Densities calculated of baseline in ratios 3:4:6:8:12:16
-                # Where 4 correspons to mdpi the baseline dpi (for instance 48 so the divisor = 12)
+                # Where 4 corresponds to mdpi the baseline dpi (for instance 48 so the divisor = 12)
                 if android_basepx == 0:
                     android_basepx = 48
                 DensityMap = { "ldpi" : 3, "mdpi" : 4, "hdpi" : 6, "xhdpi" : 8, "xxhdpi" : 12, "xxxhdpi" : 16 }
@@ -168,19 +162,29 @@ class GenerateIconsEffect(inkex.Effect):
                 for Density, Ratio in DensityMap.items():
                     DensityInPx = ( Ratio * android_basepx ) / 4
                     for DirectoryPrefix in DirectoryPrefixes:
-                        FullPath = android_path + DirectoryPrefix + "-" + Density + "/" 
+                        FullPath = os.path.join(android_path, "%s-%s" % ( DirectoryPrefix, Density ))
                         self.makePath( FullPath )
-                        os.system( "inkscape -e " + FullPath + name + ".png -h " + str( DensityInPx ) + " -f " + currentFileName )
+                        targetFile = os.path.join(FullPath, android_icon_name)
+                        export_image(
+                            currentFileName,
+                            targetFile,
+                            int(DensityInPx)
+                        )
 
             if windows_icons == "true" or windows_one_ico_file == "true":
                 self.makePath( windows_path )
-                Resolutions = [ 256, 128, 64, 48, 32, 24, 16, 12, 8 ]
-                for Resolution in Resolutions:
-                    ImagePath = windows_path + name + "-" + str( Resolution ) + ".png" 
-                    os.system("inkscape -e " + ImagePath + " -h " + str( Resolution ) + " -f " + currentFileName)
-                    self.WindowsIconCurList.append( WindowsIconInfo( ImagePath, Resolution ) )
-                if windows_one_ico_file == "true":                
-                    self.CreateIconFile( windows_path + name + ".ico", 1 )
+
+                for resolution in WINDOWS_ICON_RESOLUTIONS:
+                    windows_icon_name = "%s-%s.png" % (icon_base_name, resolution)
+                    icon_dest_path = os.path.join(windows_path, windows_icon_name)
+                    export_image(
+                        currentFileName,
+                        icon_dest_path,
+                        resolution)
+                    self.WindowsIconCurList.append( WindowsIconInfo( icon_dest_path, resolution ) )
+                if windows_one_ico_file == "true":
+                    ico_file_path = os.path.join(windows_path, "%s.ico" % icon_base_name)
+                    self.CreateIconFile(ico_file_path, 1)
 
     # Write int (defined in this program as 2 bytes ) 
     def WriteInt2ToByteArray( self, ByteArray, Value ):
@@ -224,9 +228,9 @@ class GenerateIconsEffect(inkex.Effect):
         self.CurrentOffset = self.CurrentOffset + Filesize
 
     def WriteFile( self, ByteArray, WindowsIconInfo ):
-        File = open( WindowsIconInfo.GetImagePath(), "rb" )
-        ByteArrayFile = bytearray( File.read() )
-        ByteArray.extend( ByteArrayFile )
+        with open( WindowsIconInfo.GetImagePath(), "rb" ) as File:
+            ByteArrayFile = bytearray( File.read() )
+            ByteArray.extend( ByteArrayFile )
         
         
     def CreateIconFile( self, Filename, Type ):
@@ -255,8 +259,8 @@ class GenerateIconsEffect(inkex.Effect):
             self.WriteFile( ByteArray, WindowsIconInfo )      
 
         # -- Output to a file
-        File = open( Filename, "wb" )
-        File.write( ByteArray )
+        with open( Filename, "wb" ) as File:
+            File.write( ByteArray )
 
 
 
@@ -276,8 +280,8 @@ class GenerateIconsEffect(inkex.Effect):
 
         #get document and make sure it is a square
         svg = self.document.getroot()
-        width  = self.unittouu(svg.get('width'))
-        height = self.unittouu(svg.attrib['height'])
+        width  = self.svg.unittouu(svg.get('width'))
+        height = self.svg.unittouu(svg.attrib['height'])
 
         if width != height:
             inkex.errormsg(_("Canvas is not square"))
@@ -288,8 +292,7 @@ class GenerateIconsEffect(inkex.Effect):
     def makePath(self, path):
         if not os.path.exists( path ):
             os.makedirs( path )
-        #os.system("mkdir -p " + path)
 
 # Create effect instance and apply it.
 effect = GenerateIconsEffect()
-effect.affect()
+effect.run()
