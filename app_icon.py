@@ -97,7 +97,7 @@ class GenerateIconsEffect(inkex.Effect):
         # make sure the doc meets the requirements
         passing = self.runTests()
 
-        if passing == False:
+        if not passing:
             inkex.errormsg(_("Errors encountered. Please fix them and try again."))
             exit()
         else:
