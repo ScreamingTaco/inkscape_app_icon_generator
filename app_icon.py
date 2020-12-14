@@ -165,7 +165,7 @@ class GenerateIconsEffect(inkex.Effect):
                 if android_tvdpi == "true":
                     DensityMap.update( { "tvdpi" : 4 * 1.33 } )
 
-                for Density, Ratio in DensityMap.items():
+                for Density, Ratio in list(DensityMap.items()):
                     DensityInPx = ( Ratio * android_basepx ) / 4
                     for DirectoryPrefix in DirectoryPrefixes:
                         FullPath = android_path + DirectoryPrefix + "-" + Density + "/" 
