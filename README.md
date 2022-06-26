@@ -7,8 +7,11 @@ I got tired of having to manually export different icon size when I made an icon
 
 ## TODO
 
-* Add Windows support (maybe done now?)
-* Add tests to make sure the icon meets the standards for whatever app store it is being designed for
-* refactor the python code to use subprocesses
+* Test Windows support 
+* refactor the python code to comply with pep8
 * add option to specify custom path to save to
 * clean up output
+* investigate res folder issues
+* check if there's been updates to app store requirements in the few years since this was written
+* move things from TODO to actual issues (once they have been investigated)
+* investigate the warnings this script generates and see if they can be removed
